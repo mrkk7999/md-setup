@@ -50,12 +50,42 @@ fi
 unset PGPASSWORD
 
 # Step 2: Start Kafka with Docker Compose
-echo "Starting Kafka..."
-docker-compose up -d
+echo "Checking if Kafka is already running..."
+
+if docker ps | grep -q "kafka"; then
+    echo "✅ Kafka is already running."
+else
+    echo "Starting Kafka..."
+    docker-compose up -d
+
+    if [ $? -eq 0 ]; then
+        echo "✅ Kafka started successfully!"
+    else
+        echo "❌ Failed to start Kafka!"
+        exit 1
+    fi
+fi
+
+
+
+# Step 3: Clone repositories at the parent directory level
+echo "Cloning repositories..."
+
+# Navigate to the parent directory of `md-setup`
+cd "$(dirname "$0")/.." || { echo "❌ Failed to navigate to parent directory!"; exit 1; }
+
+# Clone repositories
+git clone https://github.com/mrkk7999/md-api-gateway.git
+git clone https://github.com/mrkk7999/md-auth-svc.git
+git clone https://github.com/mrkk7999/md-tnt-mgmt.git
+git clone https://github.com/mrkk7999/md-geo-track.git
+git clone https://github.com/mrkk7999/md-geo-stream.git
 
 if [ $? -eq 0 ]; then
-    echo "✅ Kafka started successfully!"
+    echo "✅ Repositories cloned successfully!"
 else
-    echo "❌ Failed to start Kafka!"
+    echo "❌ Failed to clone repositories!"
     exit 1
 fi
+
+echo "✅ Setup completed!"
